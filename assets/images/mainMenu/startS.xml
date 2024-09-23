@@ -1,0 +1,5 @@
+﻿<TextureAtlas imagePath="startS.png">
+	<SubTexture name="startS0000" x="0" y="0" w="505" h="187"/>
+	<SubTexture name="startS0001" x="505" y="0" w="505" h="187"/>
+	<SubTexture name="startS0002" x="0" y="187" w="505" h="187"/>
+</TextureAtlas>

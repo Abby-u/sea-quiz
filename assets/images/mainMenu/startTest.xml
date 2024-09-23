@@ -1,0 +1,11 @@
+﻿<TextureAtlas imagePath="startTest.png">
+	<SubTexture name="startF0000" x="472" y="187" w="505" h="187"/>
+	<SubTexture name="startF0001" x="472" y="187" w="505" h="187"/>
+	<SubTexture name="startF0002" x="0" y="0" w="505" h="187"/>
+	<SubTexture name="startF0003" x="0" y="0" w="505" h="187"/>
+	<SubTexture name="startN0000" x="505" y="0" w="472" h="159"/>
+	<SubTexture name="startN0001" x="0" y="187" w="472" h="159"/>
+	<SubTexture name="startS0000" x="472" y="187" w="505" h="187"/>
+	<SubTexture name="startS0001" x="0" y="374" w="505" h="187"/>
+	<SubTexture name="startS0002" x="505" y="374" w="505" h="187"/>
+</TextureAtlas>

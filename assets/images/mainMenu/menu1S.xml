@@ -1,0 +1,5 @@
+﻿<TextureAtlas imagePath="menu1S.png">
+	<SubTexture name="menu1S0000" x="0" y="0" w="426" h="163"/>
+	<SubTexture name="menu1S0001" x="0" y="163" w="426" h="163"/>
+	<SubTexture name="menu1S0002" x="0" y="326" w="426" h="163"/>
+</TextureAtlas>

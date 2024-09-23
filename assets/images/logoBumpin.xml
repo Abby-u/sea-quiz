@@ -1,0 +1,8 @@
+﻿<TextureAtlas imagePath="logoBumpin.png">
+	<SubTexture name="bump0000" x="0" y="0" w="670" h="456"/>
+	<SubTexture name="bump0001" x="670" y="0" w="670" h="456"/>
+	<SubTexture name="bump0002" x="1340" y="0" w="670" h="456"/>
+	<SubTexture name="bump0003" x="1340" y="0" w="670" h="456"/>
+	<SubTexture name="bump0004" x="0" y="456" w="670" h="456"/>
+	<SubTexture name="bump0005" x="0" y="456" w="670" h="456"/>
+</TextureAtlas>

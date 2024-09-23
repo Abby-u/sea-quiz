@@ -1,0 +1,10 @@
+﻿<TextureAtlas imagePath="cardGrey.png">
+	<SubTexture name="cardIdle0000" x="0" y="0" w="790" h="472"/>
+	<SubTexture name="cardIdle0001" x="0" y="0" w="790" h="472"/>
+	<SubTexture name="cardIdle0002" x="0" y="0" w="790" h="472"/>
+	<SubTexture name="cardIdle0003" x="0" y="0" w="790" h="472"/>
+	<SubTexture name="cardIdle0004" x="0" y="472" w="790" h="472"/>
+	<SubTexture name="cardIdle0005" x="0" y="472" w="790" h="472"/>
+	<SubTexture name="cardIdle0006" x="0" y="472" w="790" h="472"/>
+	<SubTexture name="cardIdle0007" x="0" y="472" w="790" h="472"/>
+</TextureAtlas>

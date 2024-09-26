@@ -10,6 +10,8 @@ cardInfo.H = {}
 cardInfo.Q = {}
 cardInfo.A = {}
 cardInfo.S = {}
+cardInfo.Tx = {}
+cardInfo.Ty = {}
 
 function cardInfo:initInfo(cW,cH,marginLeft,marginUp,spacingLeft,spacingDown,scale)
     local i = 1
@@ -22,6 +24,8 @@ function cardInfo:initInfo(cW,cH,marginLeft,marginUp,spacingLeft,spacingDown,sca
         cardInfo.W[i] = marginLeft + (cW * i) + (spacingLeft * (i-1))
         cardInfo.H[i] = cH
         cardInfo.S[i] = scale
+        cardInfo.Tx[i] = 0
+        cardInfo.Ty[i] = 0
 
         i = i+1
     end

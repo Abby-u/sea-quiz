@@ -5,6 +5,7 @@ local cron = require 'libs/cron'
 local gVar = require 'gVar'
 local animx = require 'libs/animx'
 local camera = require 'libs/hump.camera'
+local cardInfo = require 'cardInfo'
 
 gVar.curState = 'inQuiz'
 love.window.setTitle("inQuiz state")
@@ -16,8 +17,7 @@ cancelSound = love.audio.newSource('assets/sounds/cancelMenu.ogg','static')
 
 seaBgText = love.graphics.newImage('assets/images/inQuiz/seaBgText.png')
 blackBars = love.graphics.newImage('assets/images/inQuiz/blackBars.png')
-cardTest = animx.newActor('assets/images/inQuiz/cardGrey.png'):switch('cardIdle')
-cardTest:loopAll()
+cardTest = animx.newActor('assets/images/inQuiz/cardGrey.png'):switch('cardIdle'):loopAll()
 cardHB = love.graphics.newImage('assets/images/inQuiz/cardHB.png')
 
 local curTime = gVar.bgMusicCurTime
@@ -32,8 +32,8 @@ local mouseY=love.mouse.getY()
 
 local mouseCardX,mouseCardY=0,0
 
-local camGameX = windowWidth/2
-local camGameY = windowHeight/2
+local camGameX = 0--windowWidth/2
+local camGameY = 0--windowHeight/2
 
 local camGame = camera(camGameX,camGameY,0.5)
 
@@ -58,17 +58,17 @@ function onEveryBeat()
     end
 end
 
-bgMusicBPM = 160
+bgMusicBPM = 113.850
 logoBumpin2 = animx.newAnimation('assets/images/logoBumpin.png')
 
 
 
 -- cards stuff pls dont give me errors
 
-marginL = 20
-marginR = windowWidth - marginL
-marginU = 80
-marginD = windowHeight - marginU
+local marginL = 20
+local marginR = 20
+local marginU = 80
+local marginD = 20
 
 local cardTestX = marginL
 local cardTestY = marginU
@@ -79,9 +79,28 @@ local cardTestS = 1
 
 cards = {}
 
--- cards stuff end
+cardInfo:initInfo(cardTest:getWidth(),cardTest:getHeight(),marginL,marginU,marginR,marginD,cardTestS)
+
+function drawCards()
+    for i=1,#cardInfo.X do
+        cardTest:draw(cardInfo.X[i],cardInfo.Y[i],cardTestR,cardInfo.S[i],cardInfo.S[i])
+        i=i+1
+    end
+end
 
 function cardHoverEffect()
+    for i=1,#cardInfo.X do
+        if mouseCardX > cardInfo.X[i] and mouseCardX < cardInfo.W[i] and mouseCardY > cardInfo.Y[i] and mouseCardY < cardInfo.H[i] then
+            cardInfo.S[i] = lerp(cardInfo.S[i],1.1,0.1)
+        else
+            cardInfo.S[i] = lerp(cardInfo.S[i],1,0.1)
+        end
+        i=i+1
+    end
+end
+-- cards stuff end
+
+--[[ function cardHoverEffect()
     local tempX = marginL
     local tempY = marginU
     if mouseCardX > cardTestX and mouseCardX < cardTestX + cardTest:getWidth() and mouseCardY > cardTestY and mouseCardY < cardTestY + cardTest:getHeight() then
@@ -93,7 +112,9 @@ function cardHoverEffect()
         --cardTestX = lerp(cardTestX,tempX,0.1)
         --cardTestY = lerp(cardTestY,tempY,0.1)
     end
-end
+end ]]
+
+
 
 function love.load()
     
@@ -119,17 +140,21 @@ function love.draw()
     -- card n stuff
     camGame:attach()
     cardTest:switch('cardIdle')
-    cardTest:draw(cardTestX,cardTestY,cardTestR,cardTestS,cardTestS)
+    --cardTest:draw(cardTestX,cardTestY,cardTestR,cardTestS,cardTestS)
+    drawCards()
 
-    love.graphics.rectangle('line',(cardTest:getWidth()*0+marginL*1),80, cardTest:getWidth(),cardTest:getHeight())
+    --[[ for i=1,#cardInfo.X do
+        love.graphics.rectangle('line',cardInfo:getPos(i))
+    end ]]
 
     camGame:detach()
     love.graphics.draw(blackBars,-50,-64)
     logoBumpin2:draw(windowWidth/2-(logoBumpin2:getWidth()*0.35/2),0,0,0.35,0.35)
-
+    love.graphics.print("FPS: ".. love.timer.getFPS(),0,0)
     love.graphics.print("curBeat|lastBeat: ".. curBeat..'|'..lastBeat,0,20)
     love.graphics.print("curTime: ".. curTime,0,40)
     love.graphics.print("mousePosX|mousePosY: ".. mouseCardX..' | '..mouseCardY,0,60)
+    love.graphics.print("cardInfo.S[2]: ".. cardInfo.W[2],0,80)
     
 end
 

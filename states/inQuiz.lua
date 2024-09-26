@@ -83,7 +83,7 @@ cardInfo:initInfo(cardTest:getWidth(),cardTest:getHeight(),marginL,marginU,margi
 
 function drawCards()
     for i=1,#cardInfo.X do
-        cardTest:draw(cardInfo.X[i],cardInfo.Y[i],cardTestR,cardInfo.S[i],cardInfo.S[i])
+        cardTest:draw(cardInfo.X[i]-cardInfo.Tx[i],cardInfo.Y[i]-cardInfo.Ty[i],cardTestR,cardInfo.S[i],cardInfo.S[i])
         i=i+1
     end
 end
@@ -92,8 +92,12 @@ function cardHoverEffect()
     for i=1,#cardInfo.X do
         if mouseCardX > cardInfo.X[i] and mouseCardX < cardInfo.W[i] and mouseCardY > cardInfo.Y[i] and mouseCardY < cardInfo.H[i] then
             cardInfo.S[i] = lerp(cardInfo.S[i],1.1,0.1)
+            cardInfo.Tx[i] = lerp(cardInfo.Tx[i],cardTestW*0.1,0.1)
+            cardInfo.Ty[i] = lerp(cardInfo.Ty[i],cardTestH*0.1,0.1)
         else
             cardInfo.S[i] = lerp(cardInfo.S[i],1,0.1)
+            cardInfo.Tx[i] = lerp(cardInfo.Tx[i],0,0.1)
+            cardInfo.Ty[i] = lerp(cardInfo.Ty[i],0,0.1)
         end
         i=i+1
     end

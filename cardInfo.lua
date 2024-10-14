@@ -12,6 +12,8 @@ cardInfo.A = {}
 cardInfo.S = {}
 cardInfo.Tx = {}
 cardInfo.Ty = {}
+cardInfo.Dw = {}
+cardInfo.Dh = {}
 
 function cardInfo:initInfo(cW,cH,marginLeft,marginUp,spacingLeft,spacingDown,scale)
     local i = 1
@@ -22,10 +24,12 @@ function cardInfo:initInfo(cW,cH,marginLeft,marginUp,spacingLeft,spacingDown,sca
         cardInfo.X[i] = marginLeft + (cW * (i - 1)) + (spacingLeft * (i - 1))
         cardInfo.Y[i] = marginUp --+(cH*(i-1))+(spacingDown*(i-1))
         cardInfo.W[i] = marginLeft + (cW * i) + (spacingLeft * (i-1))
-        cardInfo.H[i] = cH
+        cardInfo.H[i] = marginUp + cH
         cardInfo.S[i] = scale
         cardInfo.Tx[i] = 0
         cardInfo.Ty[i] = 0
+        cardInfo.Dw[i] = cW
+        cardInfo.Dh[i] = cH
 
         i = i+1
     end
@@ -43,6 +47,10 @@ end
 
 function cardInfo:getDrawData(i)
     return cardInfo.X[i],cardInfo.Y[i]
+end
+
+function cardInfo:getMiddle(i)
+    return cardInfo.X[i] - cardInfo.Dw[i]/2, cardInfo.Y[i] - cardInfo.Dh[i]/2
 end
 
 return cardInfo

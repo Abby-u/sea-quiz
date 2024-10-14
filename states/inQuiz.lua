@@ -6,6 +6,8 @@ local gVar = require 'gVar'
 local animx = require 'libs/animx'
 local camera = require 'libs/hump.camera'
 local cardInfo = require 'cardInfo'
+local cardShader = love.filesystem.read('cardflipshader.txt')
+--local blurshader = love.graphics.newShader(love.filesystem.read('blurshader.txt'))
 
 gVar.curState = 'inQuiz'
 love.window.setTitle("inQuiz state")
@@ -35,7 +37,7 @@ local mouseCardX,mouseCardY=0,0
 
 local camGameX = 0--windowWidth/2
 local camGameY = 0--windowHeight/2
-local camGameZoom = 0.1
+local camGameZoom = 0.5
 
 local camGame = camera(camGameX,camGameY,camGameZoom)
 
@@ -45,7 +47,6 @@ function love.keypressed(key)
             cronBack = cron.after(2, function() state.switch('states/mainMenu') end)
             cancelSound:play()
         end
-        
     end
 end
 
@@ -62,8 +63,6 @@ end
 bgMusicBPM = 113.850
 logoBumpin2 = animx.newAnimation('assets/images/logoBumpin.png')
 
-
-
 -- cards stuff pls dont give me errors
 
 local marginL = 20
@@ -78,11 +77,12 @@ local cardTestH = cardTest:getHeight()*0.5
 local cardTestR = 0
 local cardTestS = 1
 
-local cardHUDX = 0
-local cardHUDY = 0
-local cardHUDS = camGameZoom
+local cardHUDS = 1
+local cardHUDSt = 1
+local cardHUDX = windowWidth/2-(cardhud:getWidth()/2*cardHUDS)
+local cardHUDY = windowHeight/2-(cardhud:getHeight()/2*cardHUDS)
 
-local curCard = 0
+local curCard = 1
 
 cards = {}
 
@@ -100,59 +100,14 @@ function drawCards()
 end
 
 local cardFlipRot = 0
+local cardFlipRotTarget = 165
 local cardFlipX = 0
 local cardFlipY = 0
+local cardFlipXt = 50
+local cardFlipYt = 150
 local cardFlipTransform = love.math.newTransform(cardFlipX,cardFlipY)
 local cardFlipSize = {1280,720}
-local cardFlipShader = love.graphics.newShader(
-[[// Angle in radians.
-uniform float a;
-
-// Transform that you want the image to be drawn with.
-uniform mat4 image_tf;
-
-// Image size in pixels.
-uniform vec2 image_size;
-
-vec4 position(mat4 transform_projection, vec4 vertex_position)
-{
-    float xc = image_size.x / 2.0;
-    float yc = image_size.y / 2.0;
-    mat4 origin_mat = mat4(1.0, 0.0, 0.0, 0.0,
-                           0.0, 1.0, 0.0, 0.0,
-                           0.0, 0.0, 1.0, 0.0,
-                           -xc, -yc, 0.0, 1.0);
-
-    mat4 rotate_y_mat = mat4( cos(a), 0.0, sin(a), 0.0,
-                                 0.0, 1.0,    0.0, 0.0,
-                             -sin(a), 0.0, cos(a), 0.0,
-                                 0.0, 0.0,    0.0, 1.0);
-
-    // Setting this to -1.0 will flip the direction of rotation.
-    const float ROTATION_SIGN = -1.0;
-
-    // A factor that controls the foreshortening (the perspective effect).
-    // Suggested numbers: 500.0, 1000.0, 5000.0, 10000.0 etc.
-    const float FORESHORTENING = 1000.0;
-
-    // A large number to keep Z coordinates from clipping out of the screen.
-    // Try setting this to like 10.0 to see why it's needed.
-    const float Z_COMPRESSION = 10000.0;
-
-    mat4 css_projection_mat = mat4(
-    1.0, 0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0, 0.0,
-    0.0, 0.0, 1.0 / Z_COMPRESSION, ROTATION_SIGN / FORESHORTENING,
-    0.0, 0.0, 0.0, 1.0);
-
-    mat4 restore_mat = mat4(1.0);
-    restore_mat[3] = vec4(xc, yc, 0.0, 1.0);
-
-    vec4 perspective_position = restore_mat * css_projection_mat * rotate_y_mat
-                                * origin_mat * vertex_position;
-    return transform_projection * image_tf * perspective_position;
-}]]
-)
+local cardFlipShader = love.graphics.newShader(cardShader)
 
 function cardHoverEffect()
     for i=1,#cardInfo.X do
@@ -164,22 +119,26 @@ function cardHoverEffect()
             cardInfo.S[i] = lerp(cardInfo.S[i],1,0.1)
             cardInfo.Tx[i] = lerp(cardInfo.Tx[i],0,0.1)
             cardInfo.Ty[i] = lerp(cardInfo.Ty[i],0,0.1)
-            --cardFlipRot = lerp(cardFlipRot,0,0.01)
         end
         i=i+1
     end
 end
 
+function updateCardFlip()
+    cardHUDX = windowWidth/2-(cardhud:getWidth()/2*cardHUDS)
+    cardHUDY = windowHeight/2-(cardhud:getHeight()/2*cardHUDS)
+end
+
 function moveCardHUD()
-    cardFlipX = lerp(cardFlipX,-200,0.03)
-    cardFlipY = lerp(cardFlipY,10,0.03)
-    cardFlipTransform = love.math.newTransform(cardFlipX,cardFlipY)
+    updateCardFlip()
+    cardFlipX = lerp(cardFlipX,cardFlipXt,0.03)
+    cardFlipY = lerp(cardFlipY,cardFlipYt,0.03)
+    cardFlipTransform = love.math.newTransform(cardFlipX-cardHUDX,cardFlipY-cardHUDY)
 end
 
 function getCurCard()
     local j = 0
     for i=1,#cardInfo.X do
-        --curCard = 0
         if mouseCardX > cardInfo.X[i] and mouseCardX < cardInfo.W[i] and mouseCardY > cardInfo.Y[i] and mouseCardY < cardInfo.H[i] then
             j = i
             break
@@ -194,10 +153,12 @@ end
 function love.load()
     fnf = love.graphics.newFont('assets/fonts/fnf-regular.otf',96)
     text1 = love.graphics.newText(fnf)
-    text1:addf({{1,1,1},"Test"},windowWidth,'center')
+    text1:addf('cardInfo.Q[curCard]',640,'center')
+    textRot = 0
 end
 
 function love.draw()
+    --love.graphics.setShader(blurshader)
     -- background
     love.graphics.setBackgroundColor(love.math.colorFromBytes(231,157,39))
     love.graphics.draw(seaBgText,text1X + (seaBgText:getWidth()*0) ,0)
@@ -217,12 +178,7 @@ function love.draw()
     -- card n stuff
     camGame:attach()
     cardTest:switch('cardIdle')
-    --cardTest:draw(cardTestX,cardTestY,cardTestR,cardTestS,cardTestS)
     drawCards()
-
-    --[[ for i=1,#cardInfo.X do
-        
-    end ]]
 
     camGame:detach()
 
@@ -230,15 +186,22 @@ function love.draw()
     cardFlipShader:send('a', math.rad(cardFlipRot))
     cardFlipShader:send('image_tf', cardFlipTransform)
     cardFlipShader:send('image_size', cardFlipSize)
-    --cardTest:draw(640-cardTest:getWidth()/4,360-cardTest:getHeight()/4,cardTestR,cardInfo.S[1]*camGameZoom,cardInfo.S[1]*camGameZoom)
-    cardhud:draw(640-cardhud:getWidth()/2,360-cardhud:getHeight()/2,0,cardHUDS,cardHUDS)
-    love.graphics.setColor(0,0,0)
-    love.graphics.draw(text1,0,150)
+    cardFlipShader:send('ROTATION_SIGN', -1.0)
+    if curCard ~= 0 then
+    cardhud:draw(cardHUDX,cardHUDY,0,cardHUDS,cardHUDS)
+    end
+    cardFlipShader:send('a', math.rad(cardFlipRot-180))
+    cardFlipShader:send('ROTATION_SIGN', 0)
+    love.graphics.setColor(0,0,0) 
+    if cardFlipRot > 90 then
+        if curCard ~= 0 then
+    text1:setf(cardInfo.Q[curCard],640,'center')
+    love.graphics.draw(text1,windowWidth/4,windowHeight/2-text1:getHeight()/2,math.rad(0),1,1,40,0)
+        end
+    end
     love.graphics.setColor(1,1,1)
     love.graphics.setShader()
-
-
-
+    
     love.graphics.draw(blackBars,-50,-64)
     logoBumpin2:draw(windowWidth/2-(logoBumpin2:getWidth()*0.35/2),0,0,0.35,0.35)
 
@@ -246,7 +209,7 @@ function love.draw()
     love.graphics.print("curBeat|lastBeat: ".. curBeat..'|'..lastBeat,0,20)
     love.graphics.print("curTime: ".. curTime,0,40)
     love.graphics.print("mousePosX|mousePosY: ".. mouseCardX..' | '..mouseCardY,0,60)
-    love.graphics.print("cardInfo.S[2]: ".. cardFlipX .. " " .. cardFlipY,0,80)
+    love.graphics.print("cardInfo.S[2]: " .. " " .. cardFlipRot,0,80)
     
 end
 
@@ -272,34 +235,30 @@ function love.update(dt)
     mouseX,mouseY=love.mouse.getPosition()
     camGameX = lerp(camGameX,mouseX,0.05)
     camGameY = lerp(camGameY,mouseY,0.05)
-    camGame:lookAt(camGameX,camGameY)
+    camGame:lookAt(camGameX+900,camGameY-200)
 
     cardHoverEffect()
-    --cardFlipRot = lerp(cardFlipRot,165,0.03)
-    --cardHUDS = lerp(cardHUDS,1,0.03)
-    --moveCardHUD()
+    cardFlipRot = lerp(cardFlipRot,cardFlipRotTarget,0.03)
+    cardHUDS = lerp(cardHUDS,cardHUDSt,0.03)
+    moveCardHUD()
 
-
-    --[[ if cardFlipRot > 180 then
-        cardFlipRot = 0
-    else
-        cardFlipRot = cardFlipRot + dt
-    end ]]
-
+    --textRot = textRot + dt
+    
     lastBeat = curBeat
 end
 
 function love.mousepressed(x, y, button, isTouch)
     if button == 1 then
         curCard = getCurCard()
-        if curCard == 0 then 
+        if curCard == 0 then
+            cardFlipRotTarget = 0
         else
-        --cardFlipX,cardFlipY = camGame:cameraCoords(cardInfo.X[curCard],cardInfo.Y[curCard])
-        cardFlipX,cardFlipY = camGame:cameraCoords(cardInfo:getMiddle(curCard))
-        --cardFlipTransform = love.math.newTransform(cardFlipX-cardhud:getWidth()/2*camGameZoom,cardFlipY-cardhud:getHeight()/2*camGameZoom)
-        cardFlipTransform = love.math.newTransform(cardFlipX*camGameZoom,cardFlipY*camGameZoom)
+        cardFlipX,cardFlipY = camGame:cameraCoords(cardInfo:getDrawData(curCard))
+        cardFlipTransform = love.math.newTransform(cardFlipX-cardHUDX,cardFlipY-cardHUDY)
         cardFlipRot = 0
-        cardHUDS = camGameZoom
+        cardFlipRotTarget = 165
+        cardHUDS = camGameZoom*1.1
+        cardHUDSt = 1
         end
     end
 end

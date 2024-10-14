@@ -1,0 +1,40 @@
+
+uniform float a;
+
+uniform mat4 image_tf;
+
+uniform vec2 image_size;
+
+uniform float ROTATION_SIGN;
+
+vec4 position(mat4 transform_projection, vec4 vertex_position)
+{
+    float xc = image_size.x / 2.0;
+    float yc = image_size.y / 2.0;
+    mat4 origin_mat = mat4(1.0, 0.0, 0.0, 0.0,
+                           0.0, 1.0, 0.0, 0.0,
+                           0.0, 0.0, 1.0, 0.0,
+                           -xc, -yc, 0.0, 1.0);
+
+    mat4 rotate_y_mat = mat4( cos(a), 0.0, sin(a), 0.0,
+                                 0.0, 1.0,    0.0, 0.0,
+                             -sin(a), 0.0, cos(a), 0.0,
+                                 0.0, 0.0,    0.0, 1.0);
+
+    const float FORESHORTENING = 1000.0;
+
+    const float Z_COMPRESSION = 10000.0;
+
+    mat4 css_projection_mat = mat4(
+    1.0, 0.0, 0.0, 0.0,
+    0.0, 1.0, 0.0, 0.0,
+    0.0, 0.0, 1.0 / Z_COMPRESSION, ROTATION_SIGN / FORESHORTENING,
+    0.0, 0.0, 0.0, 1.0);
+
+    mat4 restore_mat = mat4(1.0);
+    restore_mat[3] = vec4(xc, yc, 0.0, 1.0);
+
+    vec4 perspective_position = restore_mat * css_projection_mat * rotate_y_mat
+                                * origin_mat * vertex_position;
+    return transform_projection * image_tf * perspective_position;
+}
